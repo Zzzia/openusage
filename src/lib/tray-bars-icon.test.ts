@@ -49,7 +49,7 @@ describe("tray-bars-icon", () => {
   it("renders svg text when percentage is provided", () => {
     const svg = makeTrayBarsSvg({
       sizePx: 18,
-      percentText: "70%",
+      gridCells: [{ text: "70%" }],
     })
     expect(svg).toContain(">70%</text>")
   })
@@ -58,36 +58,36 @@ describe("tray-bars-icon", () => {
     const originalImage = window.Image
     const originalCreateElement = document.createElement.bind(document)
 
-    // Stub Image loader to immediately fire onload once src is set.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(window as any).Image = class MockImage {
-      onload: null | (() => void) = null
-      onerror: null | (() => void) = null
-      decoding = "async"
-      set src(_value: string) {
-        queueMicrotask(() => this.onload?.())
+      // Stub Image loader to immediately fire onload once src is set.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ; (window as any).Image = class MockImage {
+        onload: null | (() => void) = null
+        onerror: null | (() => void) = null
+        decoding = "async"
+        set src(_value: string) {
+          queueMicrotask(() => this.onload?.())
+        }
       }
-    }
 
     // Stub canvas context
     const ctx = {
-      clearRect: () => {},
-      drawImage: () => {},
+      clearRect: () => { },
+      drawImage: () => { },
       getImageData: (_x: number, _y: number, w: number, h: number) => ({
         data: new Uint8ClampedArray(w * h * 4),
       }),
     }
 
-    // Patch createElement for canvas only
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(document as any).createElement = (tag: string) => {
-      const el = originalCreateElement(tag)
-      if (tag === "canvas") {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ;(el as any).getContext = () => ctx
+      // Patch createElement for canvas only
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ; (document as any).createElement = (tag: string) => {
+        const el = originalCreateElement(tag)
+        if (tag === "canvas") {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ; (el as any).getContext = () => ctx
+        }
+        return el
       }
-      return el
-    }
 
     try {
       const img = await renderTrayBarsIcon({
@@ -96,8 +96,8 @@ describe("tray-bars-icon", () => {
       expect(img).toBeTruthy()
     } finally {
       window.Image = originalImage
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(document as any).createElement = originalCreateElement
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ; (document as any).createElement = originalCreateElement
     }
   })
 })
